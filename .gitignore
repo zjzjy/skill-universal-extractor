@@ -1,0 +1,14 @@
+# Secrets
+cookies.txt
+*.cookie
+.env
+
+# Local artifacts
+.tmp/
+*.pyc
+__pycache__/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
