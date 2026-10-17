@@ -41,11 +41,6 @@ result = transcribe_video(url)
 
 B站转录使用 bili-env conda 环境。结果按下面的「统一存储」规则直接写进 Obsidian 库。
 
-2026-10-07 起脚本真的对上了：`transcript_db.render_txt()` 输出 `.md`（frontmatter + 默认折叠的 AI 导读占位 + `## 正文`），
-落 `03Resources/01Clippings/{年}/{月}/bilibili-{标题}-{YYYYMMDD}.md`；**导读由「加工长文」补**，脚本只出占位。
-临时文件（字幕 / 音频）走 `~/bilibili-auto-transcript/.tmp/`，转录完自动清。
-库外 `~/workspace/knowledge/bilibili/` 那 86 个旧 `.txt` 是历史存量，用户决定先不碰（也别再往那儿写）。
-
 **微信公众号：**
 使用 MCP 工具 `weixin-articles:read_article(url)` 获取文章 Markdown 和图片。将内容和图片保存到知识库。
 
