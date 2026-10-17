@@ -7,6 +7,20 @@ description: "多平台内容提取器。输入B站/微信公众号/小红书的
 
 根据 URL 自动识别平台，调用对应工具提取内容，统一存储到知识库。
 
+## 路径配置
+
+首次使用前，把下表里的占位符换成你机器上的实际路径（保留占位符也可以，Agent 会按「含义」一列自行解析）：
+
+| 占位符 | 含义 | 示例 |
+|--------|------|------|
+| `<KB_ROOT>` | Obsidian 库根目录 | `D:\Notes` |
+| `<SKILLS_DIR>` | Agent 技能目录 | `~/.agents/skills` |
+| `<BILI_DIR>` | B 站转录项目目录 | `~/bilibili-auto-transcript` |
+| `<TMP_DIR>` | 临时文件目录 | `~/bilibili-auto-transcript/.tmp` |
+| `<FFMPEG_BIN>` | ffmpeg 可执行文件所在目录 | `/usr/bin` |
+
+下文所有路径都使用这些占位符。
+
 ## 平台识别
 
 | URL 特征 | 平台 | 处理方式 |
@@ -25,7 +39,7 @@ description: "多平台内容提取器。输入B站/微信公众号/小红书的
 
 **B站视频：**
 ```python
-import sys; sys.path.insert(0, r'C:\Users\Hanah\bilibili-auto-transcript')
+import sys; sys.path.insert(0, r'<BILI_DIR>')
 from scripts.transcribe import transcribe_video
 result = transcribe_video(url)
 # 结果已按 §3 统一存储规则写进 Obsidian 库，不需额外移动
@@ -37,7 +51,7 @@ result = transcribe_video(url)
 2. **yt-dlp 字幕下载**：直连 API 不可用时回退
 3. **Whisper 本地语音转文字**：前两级都拿不到时才使用
 
-⚠️ B 站 AI 字幕需要登录态：`cookies.txt` 中的 SESSDATA 必须有效。若输出提示「该视频字幕需要 B 站登录态」，说明 cookie 已过期，登录 bilibili.com 后重新导出 cookie 覆盖 `C:\Users\Hanah\bilibili-auto-transcript\cookies.txt` 即可秒出字幕。
+⚠️ B 站 AI 字幕需要登录态：`cookies.txt` 中的 SESSDATA 必须有效。若输出提示「该视频字幕需要 B 站登录态」，说明 cookie 已过期，登录 bilibili.com 后重新导出 cookie 覆盖 `<BILI_DIR>/cookies.txt` 即可秒出字幕。
 
 B站转录使用 bili-env conda 环境。结果按下面的「统一存储」规则直接写进 Obsidian 库。
 
@@ -48,10 +62,10 @@ B站转录使用 bili-env conda 环境。结果按下面的「统一存储」规
 ```powershell
 # 解析 URL 中的 feed_id 和 xsec_token
 # 调用 xiaohongshu-skills CLI
-cd C:\Users\Hanah\.agents\skills\xiaohongshu-skills
-python scripts\cli.py get-feed-detail --feed-id <id> --xsec-token <token> > %TEMP%\xhs_detail.json
+cd <SKILLS_DIR>\xiaohongshu-skills
+python scripts\cli.py get-feed-detail --feed-id <id> --xsec-token <token> > <TMP_DIR>\xhs_detail.json
 # 使用 build_xhs_note_md.py 生成 Markdown（含 OCR）
-python C:\Users\Hanah\.agents\skills\xhs-note-to-md\scripts\build_xhs_note_md.py --detail-json %TEMP%\xhs_detail.json --output <output.md> --asset-dir <assets_dir> --mode text-ocr --ocr-engine wx
+python <SKILLS_DIR>\xhs-note-to-md\scripts\build_xhs_note_md.py --detail-json <TMP_DIR>\xhs_detail.json --output <output.md> --asset-dir <assets_dir> --mode text-ocr --ocr-engine wx
 ```
 
 ### 3. 统一存储
@@ -59,7 +73,7 @@ python C:\Users\Hanah\.agents\skills\xhs-note-to-md\scripts\build_xhs_note_md.py
 所有内容写进 **Obsidian 库**（不是 vault 外面的目录）：
 
 ```
-C:\Users\Hanah\OneDrive\obsidian-v2\03Resources\01Clippings\{YYYY}\{MM}\
+<KB_ROOT>\03Resources\01Clippings\{YYYY}\{MM}\
 ```
 
 日期取视频 / 文章的**发布时间**，取不到就用当天。
@@ -117,13 +131,13 @@ status: 待确认
 |------|----------|
 | B站 | `bilibili_audio*`、`bilibili_subtitle*`、`bilibili_ai_subtitle*`（仅回退路径产生，转录完成后自动清理） |
 | 微信 | 无需清理（MCP 直接返回内容，不落盘） |
-| 小红书 | `{name}_images/` 目录、`%TEMP%\xhs_note_detail.json`（MD 生成后删除） |
+| 小红书 | `{name}_images/` 目录、`<TMP_DIR>/xhs_note_detail.json`（MD 生成后删除） |
 
 ## 依赖
 
 - conda 环境 `bili-env`：yt-dlp, openai-whisper, wx-ocr, requests
-- ffmpeg：`~/ffmpeg/ffmpeg-8.1.2-essentials_build/bin/`
+- ffmpeg：`<FFMPEG_BIN>/`
 - MCP `weixin-articles`：已配置
 - XHS Bridge 浏览器插件：已安装
 - `xiaohongshu-skills`：已安装
-- cookies.txt：B站 Cookie（必须为有效登录态），位于 `~/bilibili-auto-transcript/cookies.txt`
+- cookies.txt：B站 Cookie（必须为有效登录态），位于 `<BILI_DIR>/cookies.txt`
